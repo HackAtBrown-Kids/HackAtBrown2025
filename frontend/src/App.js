@@ -1,10 +1,10 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import Homepage from './pages/Homepage.js';  // Import Homepage component
-import CreateServer from './pages/CreateServer.js';  // Import CreateServer component
-import JoinServer from './pages/JoinServer.js';  // Import JoinServer component
+import Homepage from './pages/Homepage.js';  // Import Homepage
+import CreateServer from './pages/CreateServer.js';  // Import CreateServer
+import JoinServer from './pages/JoinServer.js';  // Import JoinServer
+import Game from './pages/Game.js';
 import Header from './components/Header.js';  // Import Header component
-import Game from './components/Game.js';
 
 const App = () => {
   return (

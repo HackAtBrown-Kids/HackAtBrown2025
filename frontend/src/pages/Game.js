@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 const Game = () => {
 	return (
 		<div>
-		Hello
+			Hello
 		</div>
 		);
 };
