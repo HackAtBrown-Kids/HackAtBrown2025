@@ -6,7 +6,6 @@ const JoinServer = () => {
       <Header />
       <h2>Join a server</h2>
       <input>Server code</input>
-      <button
     </div>
   );
 };
