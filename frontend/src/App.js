@@ -10,8 +10,9 @@ const App = () => {
     <div>
       <Header /> {/* Display the header on all pages */}
       <Switch>
-        <Route exact path="/" component={MainPage} /> {/* MainPage on the root route */}
-        <Route path="/second-page" component={SecondPage} /> {/* SecondPage on /second-page route */}
+        <Route exact path="/" component={Homepage} /> 
+        <Route path="/join-server" component={CreateServer} /> 
+        <Route path="/create-server" component={JoinServer} /> 
       </Switch>
     </div>
   );
