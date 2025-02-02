@@ -11,7 +11,68 @@ const LobbyPage = ({ ws, setStartGame, roomCode }) => {
     { id: 3, username: "Player3", score: 70 },
   ]);
 
-  const [questions, setQuestions] = useState([])
+  const [questions, setQuestions] = useState([
+    {
+      "question": "What is one main function of an operating system?",
+      "correct": "Provides a user interface",
+      "choices": [
+        " Provides a user interface",
+        " Performs internet browsing",
+        " Runs applications without user input",
+        " Increases hardware speed"
+      ]
+    },
+    {
+      "question": "What does an operating system do in terms of memory management?",
+      "correct": "Keeps track of storage devices and controls RAM access",
+      "choices": [
+        " Creates software applications",
+        " Stores user files permanently",
+        " Keeps track of storage devices and controls RAM access",
+        " Provides internet connectivity"
+      ]
+    },
+    {
+      "question": "Which of the following is NOT a type of user interface mentioned?",
+      "correct": "Voice command interface",
+      "choices": [
+        " Voice command interface",
+        " Command line interface",
+        " Graphical user interface",
+        " Menu based interface"
+      ]
+    },
+    {
+      "question": "What software allows for the creation and management of databases?",
+      "correct": "Database management systems",
+      "choices": [
+        " Database management systems",
+        " Graphic processing software",
+        " Spreadsheets",
+        " Word processors"
+      ]
+    },
+    {
+      "question": "What is a feature of application software?",
+      "correct": "Toolbars",
+      "choices": [
+        " Toolbars",
+        " Operating system optimization",
+        " Network security",
+        " Power management"
+      ]
+    },
+    {
+      "question": "What type of software is used primarily for manipulating text?",
+      "correct": "Word processors",
+      "choices": [
+        " Word processors",
+        " Spreadsheets",
+        " Email clients",
+        " Web browsers"
+      ]
+    },
+  ])
 
   
   const startPong = () => {
@@ -59,9 +120,9 @@ const LobbyPage = ({ ws, setStartGame, roomCode }) => {
       </div>
       <div className="questions">
         <ul>
-          {questions.map(() => (
+          {questions.map((q) => (
             <li>
-
+              <MultipleChoiceCard question={q} />
             </li>
           ))}
         </ul>

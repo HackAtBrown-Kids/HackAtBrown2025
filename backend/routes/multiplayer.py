@@ -105,7 +105,7 @@ async def play_pong(user: User, room: Room):
         game_info[2]["x"] += game_info[2]["speedx"]
         game_info[2]["y"] += game_info[2]["speedy"]
 
-        if game_info[2]["y"] >= 400 or game_info[2]["y"] <= 0:
+        if game_info[2]["y"] >= 400 or game_info[2]["y"] <= 10:
             game_info[2]["speedy"] *= -1
 
         if (game_info[2]["y"] < game_info[0]["y"] + 100) and (game_info[2]["y"] > game_info[0]["y"]) and (game_info[2]["x"] < 20):
