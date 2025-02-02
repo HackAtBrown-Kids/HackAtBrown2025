@@ -1,9 +1,12 @@
 import '../styles/Header.css';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
     return (
       <header>
-        <h1>Game</h1>
+        <h1>
+          <Link to="/">Arcademia</Link>
+        </h1>
       </header>
     );
   };

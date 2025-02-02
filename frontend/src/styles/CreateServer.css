@@ -1,0 +1,14 @@
+h1 {
+    margin-bottom: 50px;
+}
+
+.file-upload-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.file-upload-container input {
+    text-align: center;
+    margin-bottom: 1rem;
+}

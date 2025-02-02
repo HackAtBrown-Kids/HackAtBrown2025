@@ -1,10 +1,11 @@
-import Header from '../components/Header';
 import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
+import "../styles/CreateServer.css";
 
 const JoinServer = () => {
   const [file, setFile] = useState(null);
   const [isFileUploaded, setIsFileUploaded] = useState(false);
+  const [username, setUsername] = useState("");
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]); // Store the selected file
@@ -40,22 +41,46 @@ const JoinServer = () => {
     }
   };
 
-  const createServer = (e) => {  // TODO: learn how to create a server
+  const createServer = (e) => {  // TODO
     return;
   }
 
   return (
-    <div>
-      <Header />
-      <h2>Create a server</h2>
-      <div>
-        <button onClick={uploadNotes} className="upload-notes-btn">Upload your notes</button>
-      </div>
-      {isFileUploaded && (
-        <button className="create-server-btn">
-          <Link to="/Game">Create</Link>
+    <div className="join-room-container body-container">
+      <h1>Create Multiplayer Room</h1>
+      <form onSubmit={() => {}} className="join-room-form">
+        <div className="form-group">
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter your username"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor='upload'>Upload Notes:</label>
+          <input
+            type="file"
+            accept='.pdf'
+            value={file}
+            onChange={(e) => {setFile(e.target.value); console.log(file)}}
+          />
+        </div>
+        <div className='form-group'>
+        <label htmlFor='text'>Or Import Text:</label>
+          <input
+            type="text"
+            value={file}
+            onChange={(e) => {setFile(e.target.value); console.log(file)}}
+          />
+        </div>
+        <button type="submit" className="join-button">
+          Create Room
         </button>
-      )}
+      </form>
     </div>
   );
 };

@@ -1,0 +1,10 @@
+.homepage-btns {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.homepage-btns button {
+    margin-bottom: 20px;
+}
