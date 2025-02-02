@@ -76,23 +76,14 @@ export default LobbyPage;
 
 const MultipleChoiceCard = ({ question }) => {
   // Sample question data - this could be passed as props
-  const questionData = {
-    question: "What is the capital of France?",
-    answers: [
-      "London",
-      "Paris",
-      "Berlin",
-      "Madrid"
-    ]
-  };
 
   return (
     <div className="quiz-card">
       <div className="question-header">
-        <h2>{questionData.question}</h2>
+        <h2>{question.question}</h2>
       </div>
       <div className="answers-container">
-        {questionData.answers.map((answer, index) => (
+        {question.choices.map((answer, index) => (
           <div key={index} className="answer-option">
             <span className="answer-letter">{String.fromCharCode(65 + index)}</span>
             <span className="answer-text">{answer}</span>
