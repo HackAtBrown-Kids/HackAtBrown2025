@@ -73,7 +73,7 @@ async def play_pong(room: Room):
     game_info = {
         0: {"player": room.host, "y": 0},
         1: {"player": room.users[-1], "y": 0},
-        2: {"x": 300, "y": 200, "speedx": 5, "speedy": 5},
+        2: {"x": 300, "y": 200, "speedx": 5, "speedy": 5, "angle": 90},
     }
 
     for user in room.players:
@@ -105,5 +105,5 @@ async def play_pong(room: Room):
             }
             await room.broadcast(message=message)
 
-        # if ball hits paddle
-        if 
+    # if ball hits paddle
+    if (game_info[2].y == game_info[0].y and game_info[2].x == 310): pass # TODO: x pos might differ based on position of paddles
