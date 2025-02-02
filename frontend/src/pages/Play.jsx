@@ -5,21 +5,22 @@ import { motion } from "framer-motion";
 
 import JoinServer from "./JoinServer.jsx"
 import CreateServer from "./CreateServer.jsx"
+import Game from "./Game.jsx"
 
 const Play = () => {
     const [ws, setWs] = useState(null);
 
     return <>
-        {ws ? 
-            <></>
-        :
-        <div className="join-create-container">
-            <JoinServer Ws={ws}/>
-            <div className="separator"></div>
-            <CreateServer Ws={ws}/>
-        </div>
+        {ws ?
+            <Game ws={ws} ></Game>
+            :
+            <div className="join-create-container">
+                <JoinServer setWs={setWs} />
+                <div className="separator"></div>
+                <CreateServer setWs={setWs} />
+            </div>
         }
-        
+
     </>
 }
 

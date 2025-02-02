@@ -1,8 +1,10 @@
 import "../styles/JoinServer.css"
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { v4 as uuidv4 } from 'uuid';
 
-const JoinServer = ({ Ws }) => {
+
+const JoinServer = ({ setWs }) => {
   const [username, setUsername] = useState("");
   const [roomCode, setRoomCode] = useState("");
 
@@ -12,6 +14,24 @@ const JoinServer = ({ Ws }) => {
     console.log("Joining room with:", { username, roomCode });
     alert(`Joining room ${roomCode} as ${username}`);
   };
+
+  const joinRoom = () => {
+    if (username == "") {
+      alert("Enter in a username")
+      return;
+    }
+
+    const uuid = uuidv4();
+
+    try {
+      let ws = new WebSocket(`ws://localhost:8000/multiplayer/join-room/${roomCode}?uuid=${uuid}&name=${username}`)
+      ws.onopen = setWs(ws)
+    }
+    catch (e) {
+      console.log(e)
+      alert("Could not establish connection")
+    }
+  }
 
   return (
     <motion.div className="join-room-container body-container"
@@ -44,7 +64,7 @@ const JoinServer = ({ Ws }) => {
             required
           />
         </div>
-        <button type="submit" className="join-button">
+        <button type="button" className="join-button" onClick={joinRoom}>
           Join Room
         </button>
       </form>

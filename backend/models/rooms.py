@@ -1,4 +1,5 @@
 from pydantic.dataclasses import dataclass
+from fastapi.websockets import WebSocketState
 from enum import Enum
 from string import ascii_uppercase, digits
 from random import choices
@@ -22,29 +23,54 @@ class Room:
 
     @game.setter
     def game(self, game_type: str):
-        self._game = next((game for game in GameType if game.name == game_type), GameType.NONE)
+        self._game = next((game for game in GameType if game.name.lower() == game_type.lower()), GameType.NONE)
 
     def size(self):
         return len(self.users)
 
     async def connect(self, user: User):
-        await user.websocket.accept()
+        try:
+            await user.websocket.accept()
+
+        except:
+            pass
+        
         self.users.append(user)
 
     async def disconnect(self, user: User):
         self.users.remove(user)
-        await user.websocket.close()
+        try:
+            await user.websocket.close()
 
-    async def host_dm(self, message: dict):
+        except:
+            pass
+
+    async def user_message(self, user: User, message: dict):
+        try:
+            await user.websocket.send_json(message)
+
+        except:
+            pass
+
+    async def host_message(self, message: dict):
         await self.host.websocket.send_json(message)
 
     async def broadcast(self, message: dict):
         for user in self.users:
-            await user.websocket.send_json(message)
+            await self.user_message(user=user, message=message)
+
+    async def remove_disconnected(self):
+        for user in self.users:
+            if user.websocket.application_state == WebSocketState.DISCONNECTED:
+                self.users.remove(user)
 
     async def end_room(self):
         for user in self.users:
-            await user.websocket.close()
+            try:
+                await user.websocket.close()
+
+            except:
+                pass
 
 
 @dataclass

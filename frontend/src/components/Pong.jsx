@@ -1,6 +1,7 @@
 // dict question to an array of options
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Game.css';
+import '../styles/Pong.css';
 
 const Pong = (props) => {
     const [ball, setBall] = useState({ x: 300, y: 200 });
@@ -9,57 +10,58 @@ const Pong = (props) => {
     const [startGame, setStartGame] = useState(props.startGame);
     const ballRef = useRef(null);
     const [message, setMessage] = useState('');
-    const [playerNum, setPlayerNum] = useState(null);
+    const playerNum = useRef(null)
 
     useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000');
+        console.log(props.dataStream)
+        if (props.dataStream && props.dataStream.event == 'in_progress') {
+            playerNum.current = props.dataStream.data.player;
+            console.log(playerNum.current)
+        }
+        else if (props.dataStream && props.dataStream.event == 'movement') {
+            console.log(props.dataStream)
+            setBall({ x: props.dataStream.data.ball.x, y: props.dataStream.data.ball.y });
+            setPaddles({ left: props.dataStream.data.paddles.left, right: props.dataStream.data.paddles.right });
+        }
 
-        ws.onopen = () => {
-            console.log('WebSocket connected');
-        };
-
-        ws.onmessage = (event) => {
-            if (event.data.event == 'start') {
-                setPlayerNum(event.data.player);
-            }
-            else if (event.data.event == 'movement') {
-                setBall({ x: event.data.ball.x, y: event.data.ball.y });
-                setPaddles({ left: event.data.paddles.left, right: event.data.paddles.right });
-            }
-        };
-
-        ws.onerror = (error) => {
+        props.ws.onerror = (error) => {
             console.error('WebSocket error:', error);
-            ws.close();
+            props.ws.close();
         };
 
+
+        // return () => {
+        //     props.ws.close();
+        // };
+    }, [props.dataStream]);
+
+    useEffect(() => {
         const handleKeyPress = (e) => {
             switch (e.key) {
                 case 'ArrowUp':
                     // send to websocket; player input
                     // websocket will return back new position of both paddles and ball
-                    ws.send(JSON.stringify({ event: 'keypress', data: {'key': 'up', 'player': playerNum }}));
+                    props.ws.send(JSON.stringify({ event: 'keypress', data: { 'key': 'up', 'player': playerNum.current } }));
                     console.log("up!");
                     break;
                 case 'ArrowDown':
                     // send to websocket; player input
-                    ws.send(JSON.stringify({ event: 'keypress', data: {'key': 'down', 'player': playerNum }}));
+                    props.ws.send(JSON.stringify({ event: 'keypress', data: { 'key': 'down', 'player': playerNum.current } }));
                     console.log("down!");
                     break;
                 default:
                     break;
             }
         };
-
         window.addEventListener('keydown', handleKeyPress);
 
         return () => {
             window.removeEventListener('keydown', handleKeyPress);
-            ws.close();
         };
-    }, [startGame]);
+    }, [startGame])
 
     return (
+        <>
         <div className="board">
             <div
                 className={`paddle paddle-left`}
@@ -76,7 +78,10 @@ const Pong = (props) => {
                 ref={ballRef}
                 style={{ top: `${ball.y}px`, left: `${ball.x}px` }}
             />
+
         </div>
+        </>
+        
     );
 };
 

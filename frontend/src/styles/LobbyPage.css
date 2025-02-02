@@ -1,0 +1,96 @@
+/* LobbyPage.css */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+  }
+  
+  .lobby-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .lobby-container h1 {
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    color: #007bff;
+  }
+  
+  .lobby-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    height: 80vh; /* Take up most of the screen height */
+  }
+  
+  /* Left Side: Games List */
+  .games-list {
+    flex: 2; /* Take up more space */
+    background: white;
+    padding: 20px;
+  }
+  
+  .games-list h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+  }
+  
+  .games-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .games-list .game-item {
+    margin-bottom: 10px;
+  }
+  
+  .games-list button {
+    width: 100%;
+    padding: 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .games-list button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Right Side: Leaderboard */
+  .leaderboard {
+    flex: 1; /* Take up less space */
+    background: white;
+    padding: 20px;
+  }
+  
+  .leaderboard h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+  }
+  
+  .leaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .leaderboard th,
+  .leaderboard td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .leaderboard th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+  }
+  
+  .leaderboard tr:hover {
+    background-color: #f1f1f1;
+  }

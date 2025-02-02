@@ -6,9 +6,9 @@ const Homepage = () => {
   return (
     <div className="body-container">
       <motion.h1
-        initial={{ x: -100, opacity: 0 }}  // Start off-screen to the left
-        animate={{ x: 0, opacity: 1 }}  // Slide into view
-        transition={{ duration: 1, ease: "easeOut" }}  // Smooth transition
+        initial={{ y: -100, opacity: 0 }}  // Start off-screen to the left
+        animate={{ y: 0, opacity: 1 }}  // Slide into view
+        transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}  // Smooth transition
       >
         Welcome to Arcademia, the ultimate gaming (and learning) platform!
       </motion.h1>

@@ -2,14 +2,12 @@ import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import "../styles/CreateServer.css";
 import { motion } from "framer-motion";
-import * as pdfjsLib from "pdfjs-dist";
+import pdfToText from 'react-pdftotext'
+import { v4 as uuidv4 } from 'uuid';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
 
-const JoinServer = ({ Ws }) => {
+
+const JoinServer = ({ setWs }) => {
 
   const [file, setFile] = useState(null);
   const [isFileUploaded, setIsFileUploaded] = useState(false);
@@ -23,63 +21,33 @@ const JoinServer = ({ Ws }) => {
     setFile(e.target.files[0]); // Store the selected file
   };
 
-  const extractTextFromPdf = async (file) => {
-    try {      
-      // Convert file to ArrayBuffer
-      const arrayBuffer = await file.arrayBuffer();
-      
-      // Load PDF document
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      
-      let fullText = '';
-      
-      // Iterate through each page
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ');
-        fullText += pageText + '\n\n';
-      }
-      
-      setStudyText(fullText);
-    } catch (err) {
-      setError('Error processing PDF: ' + err.message);
-    } finally {
-      console.log(studyText)
-      setLoading(false);
-    }
-  };
+  const extractText = () => {
+    pdfToText(file)
+      .then(text => setStudyText(text))
+      .catch(error => console.error("Text extraction failed"))
+  }
 
   const createRoom = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/ai/text-to-flashcard?text=${studyText}`, {  // FastAPI endpoint
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          setIsFileUploaded(true);
-          alert('Text uploaded successfully!');
-          console.log(result)
-          setLoading(false)
-          return;
-        } else {
-          console.error('Text upload failed:', response);
-          alert('Failed to upload text.');
-          setLoading(false)
-          return;
-        }
-      } catch (error) {
-        console.error('Error during text upload:', error);
-        alert('Error during text upload.');
-        setLoading(false)
-        return;
-      }
+    if (file) {
+      extractText()
     }
+    setLoading(true)
+    if (username == "") {
+      alert("Enter in a username")
+      return;
+    }
+    const uuid = uuidv4();
+
+    let user = { "uuid": uuid, "name": username }
+    try {
+      let ws = new WebSocket(`ws://localhost:8000/multiplayer/create-room?text=${studyText}&uuid=${uuid}&name=${username}`)
+      setWs(ws)
+    }
+    catch (e) {
+      console.log(e)
+      alert("Could not establish connection")
+    }
+  }
 
   return (
     <motion.div className="join-room-container body-container"
@@ -114,7 +82,7 @@ const JoinServer = ({ Ws }) => {
           <input
             type="text"
             value={studyText}
-            onChange={(e) => {setStudyText(e.target.value); console.log(studyText)}}
+            onChange={(e) => { setStudyText(e.target.value); console.log(studyText) }}
           />
         </div>
         <button type="button" className="join-button" onClick={createRoom}>
@@ -123,7 +91,6 @@ const JoinServer = ({ Ws }) => {
       </form>
       {(error) ? <p className="error-feedback">{error}</p> : <></>}
       {(loading) ? <div className="loader"></div> : <></>}
-      <button onClick={() => {extractTextFromPdf(file)}}></button>
     </motion.div>
   );
 };

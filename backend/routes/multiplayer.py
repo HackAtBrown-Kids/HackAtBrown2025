@@ -1,109 +1,149 @@
 import asyncio
-from fastapi import APIRouter, WebSocket, UploadFile
-from models import User, Room, GameState, GameType
-import httpx
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from models import User, Room, GameState, GameType, convert_to_flashcards
 
 player_router = APIRouter(prefix="/multiplayer")
 
 
 @player_router.websocket("/create-room")
-async def create_room(websocket: WebSocket, question_file: UploadFile, user: User):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            f"{websocket.base_url}/api/questions", files={"file": question_file.read()}
-        )
-        questions = response.json()
+async def create_room(websocket: WebSocket, text: str, uuid: str, name: str):
+    await websocket.accept()
+
+    user = User(uuid=uuid, name=name)
+
+    questions = convert_to_flashcards(text)
 
     user.websocket = websocket
 
     room = Room(host=user, questions=questions)
 
-    websocket.rooms[room.room_code] = room
-
-    await websocket.accept()
+    websocket.app.rooms[room.room_code] = room
 
     await game_loop(room)
 
 
 @player_router.websocket("/join-room/{room_code}")
-async def join_room(websocket: WebSocket, user: User, room_code: str):
-    user.websocket = websocket
-
+async def join_room(websocket: WebSocket, room_code: str, uuid: str, name: str):
     room = websocket.app.rooms.get(room_code, None)
 
-    await websocket.accept()
-
     if room is None:
-        await websocket.send_json({"event": "error", "data": {"type": "room_not_found"}})
+        await websocket.accept()
+        await websocket.send_json(
+            {"event": "error", "data": {"type": "room_not_found"}}
+        )
         return
 
-    room.add_player(user)
-
-    await game_loop(room)
+    user = User(uuid=uuid, name=name)
+    user.websocket = websocket
+    await room.connect(user)
 
 
 async def game_loop(room: Room):
     game_state = GameState.LOBBY
-    await room.broadcast(message={"event": "lobby"})
-    while game_state != GameState.QUIT:
-        if room.size() == 2:
-            await room.broadcast(
-                message={"event": "in_progress", "data": {"type": "select_game"}}
-            )
-            game_type = await room.host.websocket.receive_json()
-            room.game = game_type["data"]["game"]
-            game_state = GameState.IN_PROGRESS
+    await room.broadcast(
+        message={"event": "lobby", "data": {"room_code": room.room_code}}
+    )
 
-            if room.game == GameType.PONG:
-                await play_pong(room)
+    try:
+        while game_state != GameState.QUIT:
+            if room.size() == 2:
+                await room.host_message(
+                    message={"event": "queueing", "data": {"type": "select_game"}}
+                )
 
-    await room.host_dm(message={"event": "quit", "data": {"type": "replay"}})
+                game_type = await room.host.websocket.receive_json()
+                room.game = game_type["data"]["game"]
+
+                if room.game == GameType.PONG:
+                    game_state = await play_pong(room)
+
+            await asyncio.sleep(0.1)
+
+    except WebSocketDisconnect:
+        return await room.remove_disconnected()
+
+    await room.host_message(message={"event": "quit", "data": {"type": "replay"}})
     response = await room.host.websocket.receive_json()
 
     if response["data"]["replay"]:
-        await game_loop(room)
+        await game_loop(room=room)
 
     else:
         await room.broadcast(message={"event": "quit"})
         await room.end_room()
 
+
 async def play_pong(room: Room):
-    await room.broadcast(message={"event": "pong", "data": {"type": "start"}})
-    
     game_info = {
         0: {"player": room.host, "y": 0},
         1: {"player": room.users[-1], "y": 0},
-        2: {"x": 300, "y": 200, "speedx": 5, "speedy": 5, "angle": 90},
+        2: {"x": 300, "y": 200, "speedx": 0.1, "speedy": 0.1, "angle": 90},
     }
 
-    for user in room.players:
-        try:
-            resp = asyncio.wait_for(user.websocket.receive_json(), timeout=0.01)
-       
-        except asyncio.TimeoutError:
-            pass
-            
-        # take user input and update paddle location
-        # update ball by speed and check ball/paddle collision
-        # broadcast new ball/paddle location
-        game_info[2].x += game_info[2].speedx
-        game_info[2].y += game_info[2].speedy
-        if resp.event == 'keypress':
-            if resp.data["key"] == "down":
-                move_player = resp.data["player"]
-                player_pos = game_info[move_player]["y"]
-                if player_pos - 50 >= 400:
-                    player_pos -= 50
-            elif resp.data["key"] == "up":
-                move_player = resp.data["player"] 
-                player_pos = game_info[move_player]["y"]
-                if player_pos + 50 <= 400:
-                    player_pos += 50
-            message = {
-                "event": move_player,
-                "player_pos": player_pos
+    print(room.size())
+
+    for user in room.users:
+        await room.user_message(
+            user=user,
+            message={
+                "event": "in_progress",
+                "data": {
+                    "type": "start",
+                    "gamemode": "pong",
+                    "player": next(
+                        (i for i in game_info if game_info[i]["player"] == user)
+                    ),
+                },
             }
-            await room.broadcast(message=message)
+        )
+
+    return GameState.QUIT
+
+    while True:
+        try:
+            game_info[2]["x"] += game_info[2]["speedx"]
+            game_info[2]["y"] += game_info[2]["speedy"]
+
+            # Create a task to receive messages asynchronously
+            receive_task = asyncio.create_task(user.websocket.receive_json())
+
+            # Check if we received any input
+            resp = await asyncio.wait_for(receive_task, timeout=0.016)  # ~60fps
+            print(resp)
+
+            # take user input and update paddle location
+            # update ball by speed and check ball/paddle collision
+            # broadcast new ball/paddle location
+            if resp["event"] == "keypress":
+                if resp["data"]["key"] == "down":
+                    move_player = resp["data"]["player"]
+                    # if game_info[move_player]["y"] - 50 >= 400:
+                    game_info[move_player]["y"] += 50
+
+                elif resp["data"]["key"] == "up":
+                    move_player = resp["data"]["player"]
+                    # if game_info[move_player]["y"] + 50 <= 400:
+                    game_info[move_player]["y"] -= 50
+
+                message = {
+                    "event": "movement",
+                    "data": {
+                        "ball": {"x": game_info[2]["x"], "y": game_info[2]["y"]},
+                        "paddles": {
+                            "left": game_info[move_player]["y"],
+                            "right": game_info[move_player]["y"],
+                        },
+                    },
+                }
+
+                await room.user_message(user=user, message=message)
+
+        except asyncio.TimeoutError:
+            # No input received, continue game loop
+            pass
 
     # if ball hits paddle
-    if (game_info[2].y == game_info[0].y and game_info[2].x == 310): pass # TODO: x pos might differ based on position of paddles
+    if game_info[2]["y"] == game_info[0]["y"] and game_info[2]["x"] == 310:
+        pass  # TODO: x pos might differ based on position of paddles
+
+    return GameState.QUIT
