@@ -5,14 +5,14 @@
     margin-top: 20px;
 }
 
-.homepage-btns button {
-    font-size: 30px;
-    padding: 20px;
-    display: inline-block;
-    width: auto;
-    padding: 8px 15px 15px 15px !important;
+.homepage-btn {
+    margin-top: 30px;
 }
 
 button * {
     font-size: 25px !important;
+}
+
+.homepage-cont * {
+    margin-bottom: 0;
 }

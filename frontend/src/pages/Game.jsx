@@ -1,36 +1,44 @@
 // dict question to an array of options
-import React, { useState, useEffect } from 'react';
-import Pong from '../components/Pong';
-import LobbyPage from '../components/Lobby';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Game.css';
 
 const Game = (props) => {
-	const [startGame, setStartGame] = useState(false);
-	const [dataStream, setDataStream] = useState(null)
-	const [roomCode, setRoomCode] = useState("")
-  	if (props.ws) {
-        props.ws.onmessage = (e) => setDataStream(JSON.parse(e.data))
-    }
-
+	const [ball, setBall] = useState({ x: 300, y: 200});
+	const [paddles, setPaddles] = useState({ left: 10, right: 10});
+	const [gameOver, setGameOver] = useState(false);
+	const [startGame, setStartGame] = useState(props.startGame ? props.startGame : false);
 	useEffect(() => {
-		console.log(dataStream)
-		if (dataStream && dataStream.event == "in_progress" && dataStream.data && dataStream.data.gamemode == "pong") {
-			setStartGame(true)
-		}
-		if (dataStream && dataStream.data && dataStream.data.room_code) {
-			setRoomCode(dataStream.data.room_code)
-		}
-	}, [dataStream])
+		const ws = new WebSocket('ws://localhost:8000/');
 
+		const handleKeyPress = (e) => {
+			switch (e.key) {
+			case 'ArrowUp':
+				// send to websocket; player input
+				console.log("up!", startGame);
+				break;
+			case 'ArrowDown':
+				// send to websocket; player input
+				console.log("down!");
+				break;
+			default:
+				break;
+			}
+		};
+
+		const updateRender = () => {
+			
+		};
+
+		window.addEventListener('keydown', handleKeyPress);
+
+	return () => {
+		window.removeEventListener('keydown', handleKeyPress);
+	};
+	}, []);
 	return (
-		<>
-		{(startGame) ? 
-			<Pong startGame = {startGame} ws={props.ws} dataStream={dataStream} setDataStream={setDataStream} />
-			:
-			<LobbyPage ws={props.ws} setStartGame={setStartGame} roomCode={roomCode} />
-		}
-		
-		</>
+		<div className="board">
+			Hello: {props.questions}
+		</div>
 		);
 };
 
