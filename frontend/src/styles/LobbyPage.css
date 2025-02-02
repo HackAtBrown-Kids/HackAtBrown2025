@@ -81,4 +81,6 @@
   background-color: #f1f1f1;
 }
 
-
+.lobby-container ul {
+  list-style-type: none;
+}

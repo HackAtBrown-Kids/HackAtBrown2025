@@ -3,7 +3,7 @@ import "../styles/LobbyPage.css";
 import "../styles/index.css";
 
 
-const LobbyPage = ({ ws, setStartGame, roomCode }) => {
+const LobbyPage = ({ ws, setStartGame, roomCode, dataStream }) => {
   // Mock data for users and games
   const [users, setUsers] = useState([
     { id: 1, username: "Player1", score: 100 },
@@ -127,6 +127,7 @@ const LobbyPage = ({ ws, setStartGame, roomCode }) => {
           ))}
         </ul>
       </div>
+      
     </div>
   );
 };
