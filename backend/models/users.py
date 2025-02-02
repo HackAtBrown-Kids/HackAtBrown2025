@@ -6,9 +6,5 @@ from dataclasses import field
 class User:
     uuid: str
     name: str
+    score: int = 0
     websocket: WebSocket = field(default=None)
-
-@dataclass(config=dict(arbitrary_types_allowed=True))
-class Player:
-    user: User
-    score: int

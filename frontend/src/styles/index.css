@@ -4,6 +4,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #faf8f0;
+  color: #756452;
 }
 
 body, html {
@@ -22,9 +23,15 @@ button {
   padding: 9px;
   border: 5px solid #9b8776;
   border-radius: 10px;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 
-button *, button {  /* for links */
+button:hover {
+  box-shadow: 0px 0px 50px #ebd8b6;
+  transform: scale(1.05);  /* Slightly enlarge the button */
+}
+
+button *, button {  /* For links */
   text-decoration: none;
   font-weight: bold;
   color: #faf8f0;
@@ -33,7 +40,7 @@ button *, button {  /* for links */
 
 h1, h2, h3 {
   color: #756452;
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 550;
 }
 
@@ -51,4 +58,13 @@ Header * {
   text-decoration: none;
   color: #756452;
   font-weight: 700;
+}
+
+header {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+Header:hover {
+  box-shadow: 0px 0px 50px #ebd8b6;
+  transform: scale(1.05);
 }

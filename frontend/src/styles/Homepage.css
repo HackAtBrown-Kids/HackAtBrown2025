@@ -6,5 +6,13 @@
 }
 
 .homepage-btns button {
-    margin-bottom: 20px;
+    font-size: 30px;
+    padding: 20px;
+    display: inline-block;
+    width: auto;
+    padding: 8px 15px 15px 15px !important;
+}
+
+button * {
+    font-size: 25px !important;
 }

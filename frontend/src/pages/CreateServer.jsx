@@ -1,54 +1,95 @@
 import { Link } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "../styles/CreateServer.css";
+import { motion } from "framer-motion";
+import * as pdfjsLib from "pdfjs-dist";
 
-const JoinServer = () => {
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
+
+const JoinServer = ({ Ws }) => {
+
   const [file, setFile] = useState(null);
   const [isFileUploaded, setIsFileUploaded] = useState(false);
   const [username, setUsername] = useState("");
+  const [studyText, setStudyText] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [extractedText, setExtractedText] = useState("")
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]); // Store the selected file
   };
 
-  const uploadNotes = async () => {
-    if (!file) {
-      alert('Please select a file to upload!');
-      return;
-    }
-
-    const formData = new FormData();  // TODO: see how this works
-    formData.append('file', file);  // Append the selected file to the form data
-
-    try {
-      const response = await fetch('http://localhost:8000/upload/', {  // FastAPI endpoint
-        method: 'POST',
-        body: formData,  // Send the form data with the file
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('File uploaded successfully:', result);
-        setIsFileUploaded(true);
-        alert('File uploaded successfully!');
-      } else {
-        console.error('File upload failed:', response);
-        alert('Failed to upload file.');
+  const extractTextFromPdf = async (file) => {
+    try {      
+      // Convert file to ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+      
+      // Load PDF document
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      
+      let fullText = '';
+      
+      // Iterate through each page
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n\n';
       }
-    } catch (error) {
-      console.error('Error during file upload:', error);
-      alert('Error during file upload.');
+      
+      setStudyText(fullText);
+    } catch (err) {
+      setError('Error processing PDF: ' + err.message);
+    } finally {
+      console.log(studyText)
+      setLoading(false);
     }
   };
 
-  const createServer = (e) => {  // TODO
-    return;
-  }
+  const createRoom = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/ai/text-to-flashcard?text=${studyText}`, {  // FastAPI endpoint
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setIsFileUploaded(true);
+          alert('Text uploaded successfully!');
+          console.log(result)
+          setLoading(false)
+          return;
+        } else {
+          console.error('Text upload failed:', response);
+          alert('Failed to upload text.');
+          setLoading(false)
+          return;
+        }
+      } catch (error) {
+        console.error('Error during text upload:', error);
+        alert('Error during text upload.');
+        setLoading(false)
+        return;
+      }
+    }
 
   return (
-    <div className="join-room-container body-container">
-      <h1>Create Multiplayer Room</h1>
-      <form onSubmit={() => {}} className="join-room-form">
+    <motion.div className="join-room-container body-container"
+      initial={{ y: 50, opacity: 0 }}  // Start below the screen
+      animate={{ y: 0, opacity: 1 }}  // Slide up into place
+      exit={{ y: -50, opacity: 0 }}  // Slide up when exiting
+      transition={{ duration: 1, ease: "easeOut" }}
+    >
+      <h1>Create Room</h1>
+      <form onSubmit={(e) => e.preventDefault()} className="join-room-form">
         <div className="form-group">
           <label htmlFor="username">Username:</label>
           <input
@@ -65,23 +106,25 @@ const JoinServer = () => {
           <input
             type="file"
             accept='.pdf'
-            value={file}
-            onChange={(e) => {setFile(e.target.value); console.log(file)}}
+            onChange={handleFileChange}  // Use handleFileChange to set the file
           />
         </div>
         <div className='form-group'>
-        <label htmlFor='text'>Or Import Text:</label>
+          <label htmlFor='text'>Or Import Text:</label>
           <input
             type="text"
-            value={file}
-            onChange={(e) => {setFile(e.target.value); console.log(file)}}
+            value={studyText}
+            onChange={(e) => {setStudyText(e.target.value); console.log(studyText)}}
           />
         </div>
-        <button type="submit" className="join-button">
+        <button type="button" className="join-button" onClick={createRoom}>
           Create Room
         </button>
       </form>
-    </div>
+      {(error) ? <p className="error-feedback">{error}</p> : <></>}
+      {(loading) ? <div className="loader"></div> : <></>}
+      <button onClick={() => {extractTextFromPdf(file)}}></button>
+    </motion.div>
   );
 };
 

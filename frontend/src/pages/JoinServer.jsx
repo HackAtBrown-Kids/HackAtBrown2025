@@ -1,8 +1,8 @@
 import "../styles/JoinServer.css"
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 
-
-const JoinServer = () => {
+const JoinServer = ({ Ws }) => {
   const [username, setUsername] = useState("");
   const [roomCode, setRoomCode] = useState("");
 
@@ -14,8 +14,13 @@ const JoinServer = () => {
   };
 
   return (
-    <div className="join-room-container body-container">
-      <h1>Join Multiplayer Room</h1>
+    <motion.div className="join-room-container body-container"
+      initial={{ y: 50, opacity: 0 }}  // Start below the screen
+      animate={{ y: 0, opacity: 1 }}  // Slide up into place
+      exit={{ y: -50, opacity: 0 }}  // Slide up when exiting
+      transition={{ duration: 1, ease: "easeOut" }}
+    >
+      <h1>Join Room</h1>
       <form onSubmit={handleSubmit} className="join-room-form">
         <div className="form-group">
           <label htmlFor="username">Username:</label>
@@ -43,7 +48,7 @@ const JoinServer = () => {
           Join Room
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 };
 
