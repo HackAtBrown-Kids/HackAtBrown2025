@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import pdfToText from 'react-pdftotext'
 import { v4 as uuidv4 } from 'uuid';
 
-
-
 const JoinServer = ({ setWs }) => {
 
   const [file, setFile] = useState(null);

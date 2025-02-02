@@ -78,7 +78,6 @@ const Pong = (props) => {
                 ref={ballRef}
                 style={{ top: `${ball.y}px`, left: `${ball.x}px` }}
             />
-
         </div>
         </>
         

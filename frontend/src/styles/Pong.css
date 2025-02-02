@@ -23,7 +23,6 @@
     right: 0;
 }
 
-
 .board {
     position: relative;
     width: 600px;
@@ -31,4 +30,5 @@
     background-color: #c09090;
     margin: 20px auto;
     overflow: hidden;
+    margin-top: 30px;
 }
